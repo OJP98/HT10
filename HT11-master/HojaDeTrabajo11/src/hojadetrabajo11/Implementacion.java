@@ -69,26 +69,80 @@ public class Implementacion<E> {
     }                    
         return grafo;        
     } 
-    
     /**
-     * Busca la posicion de un elemento especifico en una lista de vertices
+     * Busca el centro del grafo
      * @param listaVertex: La lista de los vertices
      * @param elemento: el elemento a buscar
-     * @return: La poicion del elemento
+     * @return: El centro del grafo
      */
-    public int devolverPosicion(Vertex[] listaVertex, Vertex elemento){                
-        
-        int posicion=0;
-        
-        for (int i = 0; i < listaVertex.length; i++) {
-            
-            if (listaVertex[i].equals(elemento)){
-                
-                posicion = i;                
-            }            
+    public String centroDelGrafo(Set listaVertex, Map<String, Map<String, Integer >> listaEdge){
+         int[][] matriz =  hacerMatriz(listaVertex,listaEdge);
+         for (int i = 0; i < listaVertex.size(); i++) {
+            boolean centro = true;
+            for (int j = 0; j < listaVertex.size()-1; j++) {
+                if ((i!=j)&&((i+1)!=(j+1))){
+                    if ((matriz[i][j]!=matriz[i][j+1])||(100000==matriz[i][j])){
+                        centro = false;
+                    }
+                }
+            }
+            if (centro){
+                return "El centro es: "+listaVertex.toArray()[i];
+            }
+         }
+         return "No hay ninguna ciudad que sea el centro";
+    }
+   
+    
+    /**
+     * Metodo para el camino mas corto
+     * @param listaVertex: La lista de los vertices
+     * @param listaEdge: La lista de aristas
+     * @return 
+     * @return: Vector con el camino más corto
+     */
+    public String caminoMasCorto(Set listaVertex, Map<String, Map<String, Integer >> listaEdge,String ciudad1,String ciudad2){
+        int[][] matrizValores = Crear(listaVertex ,listaEdge );
+        String [][] matriz = new String[listaVertex.size()][listaVertex.size()];
+        for (int i = 0; i < listaVertex.size(); i++) {
+            for (int j = 0; j < listaVertex.size(); j++) {
+                matriz[i][j] = "Camino no disponible";
+                if (listaEdge.containsKey(listaVertex.toArray()[i])){
+                    if (listaEdge.get(listaVertex.toArray()[i]).containsKey(listaVertex.toArray()[j])){
+                        matriz[i][j] = ",";
+                    }
+                } 
+            }  
+        } 
+        // Algoritmo de Floyd
+        for (int i = 0; i < listaVertex.size(); i++) {
+            for (int j = 0; j < listaVertex.size(); j++) {
+               for (int k = 0; k < listaVertex.size(); k++) {
+                   if (matrizValores[i][j]>(matrizValores[i][k] + (matrizValores[k][j]))){
+                       matrizValores[i][j] = matrizValores[i][k] + matrizValores[k][j];
+                       matriz[i][j] = matriz[i][j] + listaVertex.toArray()[k] + ",";
+                   }
+               } 
+            }  
+        } 
+        //Obtener la poscion de las ciudades que se requisita
+        int x = 0;
+        int y = 0;
+        for (int i = 0; i < listaVertex.size(); i++) {
+            if (listaVertex.toArray()[i].equals(ciudad1)){
+                x = i;
+            }
+            if (listaVertex.toArray()[i].equals(ciudad2)){
+                y = i;
+            }
         }
         
-        return posicion;
+        String ciudades = matriz[x][y];
+        if (ciudades.equals("Camino no disponible")) {
+            return "Camino no disponible";
+        } else {
+            return ciudad1+ciudades+ciudad2+" "+matrizValores[x][y]+" Km";
+        }
     }
     
     /**
@@ -98,32 +152,46 @@ public class Implementacion<E> {
      * @return 
      * @return: La matriz de aydacencia
      */
-    
     public int[][] hacerMatriz(Set listaVertex, Map<String, Map<String, Integer >> listaEdge){
         
+        int[][] matriz = Crear(listaVertex ,listaEdge );
+        // Algoritmo de Floyd
+        for (int i = 0; i < listaVertex.size(); i++) {
+            for (int j = 0; j < listaVertex.size(); j++) {
+               for (int k = 0; k < listaVertex.size(); k++) {
+                   if (matriz[i][j]>(matriz[i][k] + (matriz[k][j]))){
+                       matriz[i][j] = matriz[i][k] + matriz[k][j];
+                   }
+               } 
+            }  
+        } 
+        return matriz;
+    }
+    /**
+     * Metodo que crea la matriz de adyacencia sin floyd
+     * @param listaVertex: La lista de los vertices
+     * @param listaEdge: La lista de aristas
+     * @return 
+     * @return: La matriz de aydacencia
+     */
+    public int[][] Crear(Set listaVertex, Map<String, Map<String, Integer >> listaEdge){
         int[][] matriz = new int[listaVertex.size()][listaVertex.size()];
         
         for (int i = 0; i < listaVertex.size(); i++) {
             for (int j = 0; j < listaVertex.size(); j++) {
-                matriz[i][j] = -1;
+                matriz[i][j] = 100000;
+                if (i==j){
+                  matriz[i][j] = 0;  
+                }
                 if (listaEdge.containsKey(listaVertex.toArray()[i])){
                     if (listaEdge.get(listaVertex.toArray()[i]).containsKey(listaVertex.toArray()[j])){
                         matriz[i][j] = (listaEdge.get(listaVertex.toArray()[i]).get(listaVertex.toArray()[j]));
                     }
                 } 
-                /*
-                if (listaEdge.get(listaVertex.toArray()[i]).containsKey(listaVertex.toArray()[j])){
-                    matriz[i][j] = listaEdge.get(listaVertex.toArray()[i]).get(listaVertex.toArray()[j]);
-                } else {
-                    matriz[i][j] = -1;
-                }
-                */
             }  
         } 
-        
         return matriz;
     }
-    
     /**
      * Metodo que imprime cada fila y columna de la matriz
      * @param matriz: La matriz que se quiere imprimir
@@ -139,4 +207,5 @@ public class Implementacion<E> {
         System.out.println();
         
     }
+    
 }

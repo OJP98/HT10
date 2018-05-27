@@ -18,6 +18,9 @@ public class Graph<E> {
         
         adjList.get(vertice1).put(vertice2, value);
     }
+    public E getEdge(String vertice1, String vertice2){
+       return adjList.get(vertice1).get(vertice2); 
+    }
     public Set<String> getVertices(){
         return vertices;
     }
